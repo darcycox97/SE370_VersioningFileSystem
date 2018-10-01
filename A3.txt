@@ -1,0 +1,87 @@
+Darcy Cox / dcox740 / 973248899
+
+Output from performing the specified operations while the versionfs program is active.
+
+1. 
+Input:
+echo "one1" > mount/one.txt
+
+Output:
+** create: /one.txt **
+** flush /one.txt **
+** write: /one.txt **
+** flush /one.txt **
+** release /one.txt **
+
+2.
+Input:
+cp mount/one.txt mount/two.txt
+
+Output:
+** open: /one.txt **
+** open: /two.txt **
+** truncate: /two.txt **
+** read: /one.txt **
+** write: /two.txt **
+** flush /two.txt **
+** release /two.txt **
+** flush /one.txt **
+** release /one.txt **
+
+3. 
+Input:
+cat mount/two.txt
+
+Output:
+** open: /two.txt **
+** read: /two.txt **
+** flush /two.txt **
+** release /two.txt **
+
+4.
+Input:
+cat mount/one.txt mount/two.txt > mount/three.txt
+
+Output:
+** create: /three.txt **
+** flush /three.txt **
+** open: /one.txt **
+** read: /one.txt **
+** write: /three.txt **
+** flush /one.txt **
+** release /one.txt **
+** open: /two.txt **
+** read: /two.txt **
+** write: /three.txt **
+** flush /two.txt **
+** release /two.txt **
+** flush /three.txt **
+** release /three.txt **
+
+5.
+Input:
+nano mount/three.txt (then add and delete some text, save it, then shut down the program)
+
+Output:
+** create: /.three.txt.swp **
+** write: /.three.txt.swp **
+** flush /.three.txt.swp **
+** release /.three.txt.swp **
+** open: /three.txt **
+** read: /three.txt **
+** flush /three.txt **
+** release /three.txt **
+** open: /three.txt **
+** flush /three.txt **
+** release /three.txt **
+** create: /.three.txt.swp **
+** write: /.three.txt.swp **
+** flush /.three.txt.swp **
+** release /.three.txt.swp **
+** open: /three.txt **
+** truncate: /three.txt **
+** write: /three.txt **
+** flush /three.txt **
+** release /three.txt **
+
+
