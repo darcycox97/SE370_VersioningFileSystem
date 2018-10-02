@@ -8,15 +8,8 @@ import os.path
 import os
 import sys
 import errno
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
 import shutil
 # import filecmp
->>>>>>> Stashed changes
-=======
-import shutil
->>>>>>> 603699a1dd26e4cb1ccd172d8b182dcb66815f84
 
 from fuse import FUSE, FuseOSError, Operations, LoggingMixIn
 
@@ -59,7 +52,6 @@ class VersionFS(LoggingMixIn, Operations):
         if ((operation == self.WRITE)
             or (self.current_state == self.WRITE and operation == self.FLUSH)
             or (self.current_state == self.FLUSH and operation == self.RELEASE and self.possible_save)):
-
             # valid transition in the state machine, could lead to a save
             self.possible_save = True
         else:
@@ -73,19 +65,7 @@ class VersionFS(LoggingMixIn, Operations):
             return True
 
         return False
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
 
-    # returns the full pathname of the versioned file with specified version number
-    def _version_path(self, full_path, version):
-        dirname = os.path.dirname(full_path)
-        basename = os.path.basename(full_path)
-        version_path = os.path.join(dirname, '.' + basename + '.' + str(version))
-        return version_path
->>>>>>> 603699a1dd26e4cb1ccd172d8b182dcb66815f84
-    
-=======
 
     # returns the full pathname of the versioned file with specified version number
     def _version_path(self, full_path, version):
@@ -112,7 +92,6 @@ class VersionFS(LoggingMixIn, Operations):
     #     print 'creating new version'
     #     shutil.copy(full_path, version_1)
 
->>>>>>> Stashed changes
 
     # Filesystem methods
     # ==================
@@ -257,14 +236,6 @@ class VersionFS(LoggingMixIn, Operations):
 
     def release(self, path, fh):
         print '** release', path, '**'
-<<<<<<< Updated upstream
-        if self._update_state_machine(self.RELEASE):
-<<<<<<< HEAD
-            if os.path.basename(path)[:1] != '.':
-                # only version files who are not hidden
-                # TODO make a new version if file has changed 
-                print 'save! new versions could be created here'
-=======
         # # check if the sequence of operations ending in release was a save operation
         # if self._update_save_state_machine(self.RELEASE):
         #     full_path = self._full_path(path)
@@ -281,27 +252,6 @@ class VersionFS(LoggingMixIn, Operations):
         #                 print 'no changes from current version'
         #         else:
         #             self._create_new_version(full_path)
->>>>>>> Stashed changes
-=======
-            full_path = self._full_path(path)
-            if os.path.basename(path)[:1] != '.':
-                # the file is visible and and is being saved
-                version_1 = self._version_path(full_path, 1)
-                if os.path.exists(version_1):
-                    print 'incrementing old versions'
-                    # already versioned, increment existing versions before we create the new one
-                    # version 6 will be lost if there are already 6 versions, as specified in the brief
-                    for i in range(5,0,-1):
-                        version_path = self._version_path(full_path, i)
-                        older_version_path = self._version_path(full_path, i + 1)
-                        if os.path.exists(version_path):
-                            shutil.copy(version_path, older_version_path)
-
-                # create the new version
-                print 'creating new version'
-                shutil.copy(full_path, version_1)
-                # TODO make a new version only if file has changed 
->>>>>>> 603699a1dd26e4cb1ccd172d8b182dcb66815f84
         
         return os.close(fh)
 
