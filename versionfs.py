@@ -7,6 +7,7 @@ import os.path
 import os
 import sys
 import errno
+import shutil
 
 from fuse import FUSE, FuseOSError, Operations, LoggingMixIn
 
@@ -62,6 +63,13 @@ class VersionFS(LoggingMixIn, Operations):
             return True
 
         return False
+
+    # returns the full pathname of the versioned file with specified version number
+    def _version_path(self, full_path, version):
+        dirname = os.path.dirname(full_path)
+        basename = os.path.basename(full_path)
+        version_path = os.path.join(dirname, '.' + basename + '.' + str(version))
+        return version_path
     
 
     # Filesystem methods
@@ -207,10 +215,24 @@ class VersionFS(LoggingMixIn, Operations):
     def release(self, path, fh):
         print '** release', path, '**'
         if self._update_state_machine(self.RELEASE):
+            full_path = self._full_path(path)
             if os.path.basename(path)[:1] != '.':
-                # only version files who are not hidden
-                # TODO make a new version if file has changed 
-                print 'save! new versions could be created here'
+                # the file is visible and and is being saved
+                version_1 = self._version_path(full_path, 1)
+                if os.path.exists(version_1):
+                    print 'incrementing old versions'
+                    # already versioned, increment existing versions before we create the new one
+                    # version 6 will be lost if there are already 6 versions, as specified in the brief
+                    for i in range(5,0,-1):
+                        version_path = self._version_path(full_path, i)
+                        older_version_path = self._version_path(full_path, i + 1)
+                        if os.path.exists(version_path):
+                            shutil.copy(version_path, older_version_path)
+
+                # create the new version
+                print 'creating new version'
+                shutil.copy(full_path, version_1)
+                # TODO make a new version only if file has changed 
         
         return os.close(fh)
 
