@@ -83,5 +83,3 @@ Output:
 ** write: /three.txt **
 ** flush /three.txt **
 ** release /three.txt **
-
-

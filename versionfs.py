@@ -11,6 +11,16 @@ from fuse import FUSE, FuseOSError, Operations, LoggingMixIn
 
 
 class VersionFS(LoggingMixIn, Operations):
+
+    # fields representing the operations of a save operation (write, flush, then release)
+    WRITE = "write"
+    FLUSH = "flush"
+    RELEASE = "release"
+
+    possible_save = False   # true if the sequence of operations is a subset of the save sequence
+    current_state = None    # which operation was just executed, None if not part of the save sequence
+    save = False            # becomes true when a save operation is detected
+
     def __init__(self):
         # get current working directory as place for versions tree
         self.root = os.path.join(os.getcwd(), '.versiondir')
@@ -30,26 +40,53 @@ class VersionFS(LoggingMixIn, Operations):
         path = os.path.join(self.root, partial)
         return path
 
+    # finite-state-machine-esque implementation to determine when we have the
+    # write -> flush -> release sequence in that exact order. when this occurs
+    # we know that a save has occurred. Returns true when a save has occurred
+    def _update_state_machine(self, operation):
+        if ((operation == self.WRITE)
+            or (self.current_state == self.WRITE and operation == self.FLUSH)
+            or (self.current_state == self.FLUSH and operation == self.RELEASE and self.possible_save)):
+
+            # valid transition in the state machine, could lead to a save
+            self.possible_save = True
+        else:
+            # invalid state, sequence cannot lead to a save
+            self.possible_save = False
+
+        self.current_state = operation
+
+        # save operation occurred if in valid state and most recent op was RELEASE
+        if (self.possible_save and self.current_state == self.RELEASE):
+            return True
+
+        return False
+    
+
     # Filesystem methods
     # ==================
 
     def access(self, path, mode):
+        # self._update_state_machine(None)
         # print "access:", path, mode
         full_path = self._full_path(path)
         if not os.access(full_path, mode):
             raise FuseOSError(errno.EACCES)
 
     def chmod(self, path, mode):
+        # self._update_state_machine(None)
         # print "chmod:", path, mode
         full_path = self._full_path(path)
         return os.chmod(full_path, mode)
 
     def chown(self, path, uid, gid):
+        # self._update_state_machine(None)
         # print "chown:", path, uid, gid
         full_path = self._full_path(path)
         return os.chown(full_path, uid, gid)
 
     def getattr(self, path, fh=None):
+        # self._update_state_machine(None)
         # print "getattr:", path
         full_path = self._full_path(path)
         st = os.lstat(full_path)
@@ -57,6 +94,7 @@ class VersionFS(LoggingMixIn, Operations):
                      'st_gid', 'st_mode', 'st_mtime', 'st_nlink', 'st_size', 'st_uid'))
 
     def readdir(self, path, fh):
+        # self._update_state_machine(None)
         # print "readdir:", path
         full_path = self._full_path(path)
 
@@ -67,6 +105,7 @@ class VersionFS(LoggingMixIn, Operations):
             yield r
 
     def readlink(self, path):
+        # self._update_state_machine(None)
         # print "readlink:", path
         pathname = os.readlink(self._full_path(path))
         if pathname.startswith("/"):
@@ -76,19 +115,23 @@ class VersionFS(LoggingMixIn, Operations):
             return pathname
 
     def mknod(self, path, mode, dev):
+        # self._update_state_machine(None)
         # print "mknod:", path, mode, dev
         return os.mknod(self._full_path(path), mode, dev)
 
     def rmdir(self, path):
+        # self._update_state_machine(None)
         # print "rmdir:", path
         full_path = self._full_path(path)
         return os.rmdir(full_path)
 
     def mkdir(self, path, mode):
+        # self._update_state_machine(None)
         # print "mkdir:", path, mode
         return os.mkdir(self._full_path(path), mode)
 
     def statfs(self, path):
+        # self._update_state_machine(None)
         # print "statfs:", path
         full_path = self._full_path(path)
         stv = os.statvfs(full_path)
@@ -97,22 +140,27 @@ class VersionFS(LoggingMixIn, Operations):
             'f_frsize', 'f_namemax'))
 
     def unlink(self, path):
+        # self._update_state_machine(None)
         # print "unlink:", path
         return os.unlink(self._full_path(path))
 
     def symlink(self, name, target):
+        # self._update_state_machine(None)
         # print "symlink:", name, target
         return os.symlink(target, self._full_path(name))
 
     def rename(self, old, new):
+        # self._update_state_machine(None)
         # print "rename:", old, new
         return os.rename(self._full_path(old), self._full_path(new))
 
     def link(self, target, name):
+        # self._update_state_machine(None)
         # print "link:", target, name
         return os.link(self._full_path(name), self._full_path(target))
 
     def utimens(self, path, times=None):
+        # self._update_state_machine(None)
         # print "utimens:", path, times
         return os.utime(self._full_path(path), times)
 
@@ -120,40 +168,49 @@ class VersionFS(LoggingMixIn, Operations):
     # ============
 
     def open(self, path, flags):
+        self._update_state_machine(None)
         print '** open:', path, '**'
         full_path = self._full_path(path)
         return os.open(full_path, flags)
 
     def create(self, path, mode, fi=None):
+        self._update_state_machine(None)
         print '** create:', path, '**'
         full_path = self._full_path(path)
         return os.open(full_path, os.O_WRONLY | os.O_CREAT, mode)
 
     def read(self, path, length, offset, fh):
+        self._update_state_machine(None)
         print '** read:', path, '**'
         os.lseek(fh, offset, os.SEEK_SET)
         return os.read(fh, length)
 
     def write(self, path, buf, offset, fh):
+        self._update_state_machine(self.WRITE)
         print '** write:', path, '**'
         os.lseek(fh, offset, os.SEEK_SET)
         return os.write(fh, buf)
 
     def truncate(self, path, length, fh=None):
+        self._update_state_machine(None)
         print '** truncate:', path, '**'
         full_path = self._full_path(path)
         with open(full_path, 'r+') as f:
             f.truncate(length)
 
     def flush(self, path, fh):
+        self._update_state_machine(self.FLUSH)
         print '** flush', path, '**'
         return os.fsync(fh)
 
     def release(self, path, fh):
         print '** release', path, '**'
+        if self._update_state_machine(self.RELEASE):
+            print 'save!'
         return os.close(fh)
 
     def fsync(self, path, fdatasync, fh):
+        self._update_state_machine(None)
         print '** fsync:', path, '**'
         return self.flush(path, fh)
 
