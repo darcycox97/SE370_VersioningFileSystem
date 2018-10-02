@@ -3,6 +3,7 @@ from __future__ import with_statement
 
 import logging
 
+import os.path
 import os
 import sys
 import errno
@@ -206,7 +207,11 @@ class VersionFS(LoggingMixIn, Operations):
     def release(self, path, fh):
         print '** release', path, '**'
         if self._update_state_machine(self.RELEASE):
-            print 'save!'
+            if os.path.basename(path)[:1] != '.':
+                # only version files who are not hidden
+                # TODO make a new version if file has changed 
+                print 'save! new versions could be created here'
+        
         return os.close(fh)
 
     def fsync(self, path, fdatasync, fh):
