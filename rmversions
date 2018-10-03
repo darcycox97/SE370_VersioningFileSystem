@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+# USAGE: remversions <filename>
+# Removes all versions of <filename> except for the current one
+
+import glob
+import os
+import sys
+import shutil
+
+# returns the path to a specific version of filename
+def path_to_version(filename, version):
+    return os.path.join('.versiondir', '.versions', '.' + filename + '.' + version)
+
+if __name__ == '__main__':
+    # extract filename from arguments
+    filename = sys.argv[1]
+
+    # go through all versions except for the first one and remove them if they exist
+    for i in range(2, 7):
+        if os.path.exists(path_to_version(filename, str(i))):
+             os.remove(path_to_version(filename, str(i)))
+
+    sys.exit(0)
+
