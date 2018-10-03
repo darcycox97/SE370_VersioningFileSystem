@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# USAGE: catversion <filename> <version_number>
+# Displays the contents of version <version_number> of <filename> on screen
+
+path_to_version=".versiondir/.versions/.$1.$2"
+
+if [ -e $path_to_version ]; then
+    cat $path_to_version
+    exit 0
+else 
+    echo "version $2 of file $1 does not exist"
+    exit 1
+fi
