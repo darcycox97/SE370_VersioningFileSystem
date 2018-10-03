@@ -22,11 +22,15 @@ class VersionFS(LoggingMixIn, Operations):
     FLUSH = "flush"
     RELEASE = "release"
 
+    # name of folder to store versions in.
+    # separate folder for versions is used so we can easily exclude this folder
+    # from the users view of the mount directory, so users will not be aware of versioning
+    VERSIONS_FOLDER = ".versions"
+
     possible_save = False   # true if the sequence of operations is a subset of the save sequence
     current_state = None    # which operation was just executed, None if not part of the save sequence
 
     def __init__(self):
-        print 'init'
         # get current working directory as place for versions tree
         self.root = os.path.join(os.getcwd(), '.versiondir')
         # check to see if the versions directory already exists
@@ -71,12 +75,19 @@ class VersionFS(LoggingMixIn, Operations):
     def _version_path(self, full_path, version):
         dirname = os.path.dirname(full_path)
         basename = os.path.basename(full_path)
-        version_path = os.path.join(dirname, '.' + basename + '.ver.' + str(version))
+        version_path = os.path.join(dirname, self.VERSIONS_FOLDER, '.' + basename + '.ver.' + str(version))
         return version_path
 
     # creates a new version for the specified file and modifies the version numbers
     # of pre-existing versions of that file if necessary. 
     def _create_new_version(self, full_path):
+
+        # create .versions folder if it doesn't exist
+        if not os.path.exists(self._full_path(self.VERSIONS_FOLDER)):
+            os.mkdir(self._full_path(self.VERSIONS_FOLDER)) 
+
+            
+
         # if the file is already versioned, update the version numbers of the older versions
         # overwriting the 6th version if need be, as only max 6 versions should be stored
         version_1 = self._version_path(full_path, 1)
@@ -133,7 +144,10 @@ class VersionFS(LoggingMixIn, Operations):
         if os.path.isdir(full_path):
             dirents.extend(os.listdir(full_path))
         for r in dirents:
-            yield r
+            # return all contents of directory except for versions folder
+            print r
+            if r != self.VERSIONS_FOLDER:
+                yield r
 
     def readlink(self, path):
         # self._update_save_state_machine(None)
