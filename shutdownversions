@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# USAGE: shutdownversions
+# Tears down the .versiondir directory and the user file system
+
+rm -r .versiondir
+fusermount -u mount
+
+exit 0
