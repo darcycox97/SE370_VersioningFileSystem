@@ -1,0 +1,29 @@
+#!/usr/bin/env python
+
+# USAGE: listversions <filename>
+# Will list all versions stored for the filename. Filename should be the name of 
+# a file in the mount directory.
+# E.g if test.txt is in the mount dir and has two versions: (.1 is the most recent version)
+# listversions test.txt
+# >> test.txt.1
+# >> test.txt.2
+
+import glob
+import os
+import sys
+
+if __name__ == '__main__':
+    # extract filename from arguments
+    filename = sys.argv[1]
+
+    # get path to the versions folder
+    versions_folder_path = os.path.join('.versiondir', '.versions')
+
+    # get list of all versions of filename and sort it 
+    versions = glob.glob(versions_folder_path + '/.' + filename + '.*')
+    versions = sorted(versions)
+
+    # print out the stored versions (without the dot as the first character)
+    for v in versions:
+        print os.path.basename(v)[1:]
+
