@@ -70,12 +70,11 @@ class VersionFS(LoggingMixIn, Operations):
 
         return False
 
-
     # returns the full pathname of the versioned file with specified version number
     def _version_path(self, full_path, version):
         dirname = os.path.dirname(full_path)
         basename = os.path.basename(full_path)
-        version_path = os.path.join(dirname, self.VERSIONS_FOLDER, '.' + basename + '.ver.' + str(version))
+        version_path = os.path.join(dirname, self.VERSIONS_FOLDER, '.' + basename + '.' + str(version))
         return version_path
 
     # creates a new version for the specified file and modifies the version numbers
@@ -85,8 +84,6 @@ class VersionFS(LoggingMixIn, Operations):
         # create .versions folder if it doesn't exist
         if not os.path.exists(self._full_path(self.VERSIONS_FOLDER)):
             os.mkdir(self._full_path(self.VERSIONS_FOLDER)) 
-
-            
 
         # if the file is already versioned, update the version numbers of the older versions
         # overwriting the 6th version if need be, as only max 6 versions should be stored
@@ -137,7 +134,6 @@ class VersionFS(LoggingMixIn, Operations):
     def readdir(self, path, fh):
         # self._update_save_state_machine(None)
         # print "readdir:", path
-        # TODO: filter out the version files (should be hidden in MOUNT dir)
         full_path = self._full_path(path)
 
         dirents = ['.', '..']
@@ -145,7 +141,6 @@ class VersionFS(LoggingMixIn, Operations):
             dirents.extend(os.listdir(full_path))
         for r in dirents:
             # return all contents of directory except for versions folder
-            print r
             if r != self.VERSIONS_FOLDER:
                 yield r
 
@@ -281,5 +276,5 @@ def main(mountpoint):
     FUSE(VersionFS(), mountpoint, nothreads=True, foreground=True)
 
 if __name__ == '__main__':
-    # logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
     main(sys.argv[1])
