@@ -23,7 +23,14 @@ if __name__ == '__main__':
     versions = glob.glob(versions_folder_path + '/.' + filename + '.*')
     versions = sorted(versions)
 
+    # exit early if no versions found
+    if len(versions) == 0:
+        print 'No versions found for file ' + filename
+        sys.exit(0)
+
     # print out the stored versions (without the dot as the first character)
     for v in versions:
         print os.path.basename(v)[1:]
+    
+    sys.exit(0)
 
