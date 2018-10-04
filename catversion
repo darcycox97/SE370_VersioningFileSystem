@@ -3,6 +3,8 @@
 # USAGE: catversion <filename> <version_number>
 # Displays the contents of version <version_number> of <filename> on screen
 
+# Author: Darcy Cox, dcox740
+
 path_to_version=".versiondir/.versions/.$1.$2"
 
 if [ -e $path_to_version ]; then

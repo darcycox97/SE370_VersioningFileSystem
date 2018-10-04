@@ -3,6 +3,8 @@
 # USAGE: shutdownversions
 # Tears down the .versiondir directory and the user file system
 
+# Author: Darcy Cox, dcox740
+
 rm -r .versiondir
 fusermount -u mount
 

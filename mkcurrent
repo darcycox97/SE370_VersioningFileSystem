@@ -6,6 +6,8 @@
 # e.g mkcurrent test.txt 3:
 # version 3 becomes version 1, and all versions below 3 are shifted
 
+# Author: Darcy Cox, dcox740
+
 import glob
 import os
 import sys

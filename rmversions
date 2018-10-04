@@ -3,6 +3,8 @@
 # USAGE: remversions <filename>
 # Removes all versions of <filename> except for the current one
 
+# Author: Darcy Cox, dcox740
+
 import glob
 import os
 import sys

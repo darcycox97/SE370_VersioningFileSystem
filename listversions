@@ -8,6 +8,8 @@
 # >> test.txt.1
 # >> test.txt.2
 
+# Author: Darcy Cox, dcox740
+
 import glob
 import os
 import sys
