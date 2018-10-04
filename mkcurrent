@@ -42,6 +42,10 @@ if __name__ == '__main__':
 
     # now there is a free slot at version 1 so we can make the specified version current
     shutil.copy(tmp, path_to_version(filename, str(1)))
+
+    # copy the new current version into the user's view of the file
+    file_path = os.path.join('.versiondir', filename)
+    shutil.copy(tmp, file_path)
     os.remove(tmp)
 
     sys.exit(0)

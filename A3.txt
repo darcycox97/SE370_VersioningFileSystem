@@ -83,3 +83,21 @@ Output:
 ** write: /three.txt **
 ** flush /three.txt **
 ** release /three.txt **
+
+
+##########################################
+
+Discuss the pros and cons of deleting all versions if a file is deleted in the mount directory:
+
+If all versions are deleted, this means that the file / history of the file is not recoverable.
+For example if a user accidentally deleted a file they will have no way of getting it back. However, the file
+system will be using the space most efficiently as no obsolete files will be kept in the cases that a file was
+purposefully deleted.
+
+If all versions are kept this will be good in cases where files are deleted by accident, as they will be easily recoverable.
+However, if the file system is being used extensively, and the user intends to delete files permanently, there will be a lot of 
+obsolete data that was intended to be deleted, which is using storage very in-efficiently.
+
+Whichever option is best probably depends on how the file system is intended to be used. If it is to generally be used by people then
+it would be good to have the recoverability benefit of keeping versions of deleted files. If the file is to be largely used by automation
+then the chances of an accidental deletion are much lower and it is probably best to delete version files along with the files.

@@ -276,5 +276,5 @@ def main(mountpoint):
     FUSE(VersionFS(), mountpoint, nothreads=True, foreground=True)
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
+    # logging.basicConfig(level=logging.DEBUG)
     main(sys.argv[1])
