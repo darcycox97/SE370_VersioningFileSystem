@@ -4,7 +4,7 @@
 # Makes version_number the current version of filename.
 # filename is assumed to exist in the mount directory
 # e.g mkcurrent test.txt 3:
-# version 3 becomes version 1, and all versions below 3 are shifted
+# version 3 becomes version 1, and all versions are shifted
 
 # Author: Darcy Cox, dcox740
 
@@ -37,10 +37,11 @@ if __name__ == '__main__':
     tmp = to_make_current + '.tmp'
     shutil.copy(to_make_current, tmp)
 
-    # increment the more recent versions so we can make the 
+    # increment the versions so we can make the 
     # specified version current without losing data
-    for i in range(int(version) - 1, 0, -1):
-        shutil.copy(path_to_version(filename, str(i)), path_to_version(filename, str(i + 1)))
+    for i in range(5, 0, -1):
+        if os.path.exists(path_to_version(filename, str(i))):
+            shutil.copy(path_to_version(filename, str(i)), path_to_version(filename, str(i + 1)))
 
     # now there is a free slot at version 1 so we can make the specified version current
     shutil.copy(tmp, path_to_version(filename, str(1)))
