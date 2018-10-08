@@ -246,9 +246,11 @@ class VersionFS(LoggingMixIn, Operations):
     def release(self, path, fh):
         print '** release', path, '**'
         close_val = os.close(fh)
+	full_path = self._full_path(path)
         # check if the sequence of operations ending in release was a save operation
-        if self._update_save_state_machine(self.RELEASE):
-            full_path = self._full_path(path)
+	# or if the released file is not yet versioned
+        if self._update_save_state_machine(self.RELEASE) or not os.path.exists(self._version_path(full_path, 1)):
+            
             # only visible files should be versioned, so check first character of basename
             if os.path.basename(path)[:1] != '.':
                 print 'save!'
